@@ -17,7 +17,7 @@ def check(client, url):
     start = time.perf_counter()
     try:
         r = client.get(url, timeout=10, follow_redirects=True)
-        return r.status_code, int((time.perf_counter() - start) * 1000), r.status_code < 0
+        return r.status_code, int((time.perf_counter() - start) * 1000), r.status_code < 400
     except httpx.HTTPError:
         return None, int((time.perf_counter() - start) * 1000), False
 
