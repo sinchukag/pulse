@@ -14,7 +14,7 @@ async def lifespan(app):
     yield
     pool.close()
 
-app = FastAPI(title="Pulse API", lifespan=lifespan)
+app = FastAPI(title="Pulse API v2", lifespan=lifespan)
 
 class MonitorIn(BaseModel):
     name: str
