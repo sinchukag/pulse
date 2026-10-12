@@ -102,5 +102,5 @@ jobs:
             git pull
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
-            docker compose -f docker-compose.prod.yml restart caddy
+            docker compose -f docker-compose.prod.yml up -d --force-recreate caddy
             docker image prune -f
