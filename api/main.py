@@ -1,6 +1,6 @@
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, Header, HTTPException
 from pydantic import BaseModel, HttpUrl
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
@@ -15,7 +15,13 @@ async def lifespan(app):
     pool.close()
 
 app = FastAPI(title="Pulse API v2", lifespan=lifespan)
+import secrets
 
+API_KEY = os.environ.get("API_KEY", "")
+
+def require_key(x_api_key: str = Header(default="")):
+    if not API_KEY or not secrets.compare_digest(x_api_key, API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 class MonitorIn(BaseModel):
     name: str
     url: HttpUrl
@@ -27,7 +33,7 @@ def health():
         c.execute("SELECT 1")
     return {"status": "ok"}
 
-@app.post("/monitors", status_code=201)
+@app.post("/monitors", status_code=201, dependencies=[Depends(require_key)])
 def create_monitor(m: MonitorIn):
     with pool.connection() as c:
         return c.execute(

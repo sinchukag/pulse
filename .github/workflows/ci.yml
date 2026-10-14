@@ -38,7 +38,7 @@ jobs:
           import urllib.request as u, json
           req = u.Request('http://localhost:8000/monitors',
               data=json.dumps({'name':'GitHub','url':'https://github.com','interval_seconds':10}).encode(),
-              headers={'Content-Type':'application/json'})
+              headers={'Content-Type':'application/json','X-API-Key':'change-me'})
           print(u.urlopen(req).status)"
           sleep 25
           docker compose logs worker | grep "ok=True"
