@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .vscode/
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/terraform.tfvars
