@@ -97,6 +97,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location              = azurerm_resource_group.rg.location
   size                  = "Standard_B1s"
   admin_username        = "azureuser"
+    custom_data = base64encode(file("${path.module}/cloud-init.yaml"))
   network_interface_ids = [azurerm_network_interface.nic.id]
 
   admin_ssh_key {

@@ -1,0 +1,14 @@
+#cloud-config
+package_update: true
+packages:
+  - git
+  - curl
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - usermod -aG docker azureuser
+  - git clone https://github.com/sinchukag/pulse.git /home/azureuser/pulse
+  - cp /home/azureuser/pulse/.env.example /home/azureuser/pulse/.env
+  - sed -i "s/change-me/$(openssl rand -hex 16)/g" /home/azureuser/pulse/.env
+  - chown -R azureuser:azureuser /home/azureuser/pulse
+  - cd /home/azureuser/pulse && docker compose -f docker-compose.prod.yml up -d
