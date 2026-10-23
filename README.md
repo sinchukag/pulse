@@ -108,7 +108,7 @@ See [notes.md](notes.md) for what happens when the database is stopped, restarte
 
 - Single VM, no high availability.
 - No alerting or dashboards yet.
-- Terraform provisions the server but doesn't yet install Docker or deploy Pulse.
+
 
 ## Roadmap
 
@@ -117,6 +117,6 @@ See [notes.md](notes.md) for what happens when the database is stopped, restarte
 - [x] Phase 3: deployed to Azure VM with a domain, HTTPS and automatic deploys
 - [x] API key authentication for write endpoints
 - [x] Infrastructure as Code (Terraform)
-- [ ] Cloud-init: one `terraform apply` gives a running Pulse
+- [x] Cloud-init: one `terraform apply` gives a running Pulse
 - [ ] Monitoring and alerting (Prometheus, Grafana)
 - [ ] Kubernetes
