@@ -3,6 +3,7 @@ import httpx
 import psycopg
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 DSN = os.environ["DATABASE_URL"]
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
