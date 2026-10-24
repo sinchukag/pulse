@@ -3,10 +3,68 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
   pull_request:
+    paths-ignore:
+      - "**.md"
 
 jobs:
+  # 1. Looks for leaked secrets in the code and the full Git history
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 2. Runs the pytest tests (no database needed)
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install pytest httpx -r api/requirements.txt -r worker/requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -v
+
+  # 3. Builds both images and scans them for known vulnerabilities
+  image-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Build images
+        run: |
+          docker build -t pulse-api:scan ./api
+          docker build -t pulse-worker:scan ./worker
+
+      - name: Scan images with Trivy (fail only on fixable HIGH/CRITICAL)
+        run: |
+          for img in pulse-api:scan pulse-worker:scan; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              aquasec/trivy:0.58.0 image \
+              --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$img"
+          done
+
+  # 4. Your existing end-to-end smoke test (unchanged)
   build-and-test:
+    needs: [unit-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Get the code
@@ -52,7 +110,7 @@ jobs:
         run: docker compose down -v
 
   publish:
-    needs: build-and-test
+    needs: [build-and-test, secrets-scan, image-scan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
